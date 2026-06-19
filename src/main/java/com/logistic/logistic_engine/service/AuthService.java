@@ -3,6 +3,7 @@ package com.logistic.logistic_engine.service;
 import com.logistic.logistic_engine.dto.request.LoginRequest;
 import com.logistic.logistic_engine.dto.request.RegisterRequest;
 import com.logistic.logistic_engine.dto.response.LoginResponse;
+import com.logistic.logistic_engine.dto.response.UserProfileResponse;
 import com.logistic.logistic_engine.entity.Agent;
 import com.logistic.logistic_engine.entity.Customer;
 import com.logistic.logistic_engine.entity.User;
@@ -93,6 +94,19 @@ public class AuthService {
                 user.getEmail(),
                 user.getRole(),
                 token
+        );
+    }
+
+    public UserProfileResponse getCurrentUser(String email){
+        User user = userRepository.findByEmail(email)
+                        .orElseThrow(
+                                () -> new RuntimeException("User Not Found")
+                        );
+        return new UserProfileResponse(
+                user.getId(),
+                user.getName(),
+                user.getEmail(),
+                user.getRole()
         );
     }
 }
