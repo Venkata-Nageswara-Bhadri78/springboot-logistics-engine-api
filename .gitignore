@@ -1,0 +1,87 @@
+# ==========================================
+# Spring Boot / Maven
+# ==========================================
+
+# Maven build output
+target/
+
+# Maven Wrapper JAR
+.mvn/wrapper/maven-wrapper.jar
+
+# ==========================================
+# Application Configuration
+# ==========================================
+
+# Local application configuration (contains secrets)
+src/main/resources/application.properties
+
+# Optional profile-specific local configs
+application-local.properties
+application-dev.properties
+
+# Environment files
+.env
+.env.*
+
+# ==========================================
+# Java
+# ==========================================
+
+*.class
+*.log
+
+# ==========================================
+# macOS
+# ==========================================
+
+.DS_Store
+
+# ==========================================
+# VS Code
+# ==========================================
+
+.vscode/
+
+# ==========================================
+# IntelliJ IDEA
+# ==========================================
+
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# ==========================================
+# Eclipse / STS
+# ==========================================
+
+.project
+.classpath
+.settings/
+.factorypath
+.apt_generated
+.springBeans
+.sts4-cache
+
+# ==========================================
+# NetBeans
+# ==========================================
+
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+
+# ==========================================
+# Logs
+# ==========================================
+
+logs/
+
+# ==========================================
+# Windows
+# ==========================================
+
+Thumbs.db
