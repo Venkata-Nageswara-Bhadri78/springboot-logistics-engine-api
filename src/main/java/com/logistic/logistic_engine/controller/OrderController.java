@@ -106,15 +106,34 @@ public class OrderController {
     }
 
     @PutMapping("/{id}/start-delivery")
-    public CreateOrderResponse startOrderDelivery(@PathVariable Long orderId) {
+    public ResponseEntity<ApiResponse<CreateOrderResponse>> startOrderDelivery(@PathVariable Long orderId) {
         String email = SecurityContextHolder
                         .getContext()
                         .getAuthentication()
                         .getName();
         CreateOrderResponse data = orderService.startOrderDelivery(email, orderId);
-        
-        return null;
+        ApiResponse<CreateOrderResponse> response = new ApiResponse<>(
+            true,
+            "Delivery Started Sucessfully",
+            data
+        );
+        return ResponseEntity.ok(response);
     }
     
+    @PutMapping("/{id}/deliver")
+    public ResponseEntity<ApiResponse<CreateOrderResponse>> completeOrderDevilery(@PathVariable Long orderId) {
+        String email = SecurityContextHolder
+                        .getContext()
+                        .getAuthentication()
+                        .getName();
+        CreateOrderResponse data = orderService.completeOrderDelivery(email, orderId);
+
+        ApiResponse<CreateOrderResponse> response = new ApiResponse<>(
+            true,
+            "Order Deliveried Sucessfully",
+            data
+        );
+        return ResponseEntity.ok(response);        
+    }
     
 }

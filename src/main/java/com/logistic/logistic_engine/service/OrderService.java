@@ -133,7 +133,7 @@ public class OrderService {
                         .findByEmail(email)
                         .orElseThrow(
                                 () -> new RuntimeException(
-                                        "User not found"
+                                    "User not found"
                                 )
                         );
 
@@ -224,9 +224,69 @@ public class OrderService {
             );
         }
         order.setStatus(OrderStatus.IN_TRANSIT);
+        orderRepository.save(order);
+
+        OrderHistory history = OrderHistory.builder()
+                .order(order)
+                .previousStatus(OrderStatus.ASSIGNED)
+                .newStatus(OrderStatus.IN_TRANSIT)
+                .changedBy(admin)
+                .note("Order Started to Delivery")
+                .build();
+
+        orderHistoryRepository.save(history);
 
         CreateOrderResponse orderResponse = new CreateOrderResponse(order.getId(), order.getStatus());
 
+        return orderResponse;
+    }
+
+    public CreateOrderResponse completeOrderDelivery(String email, Long orderId){
+        User admin = userRepository
+            .findByEmail(email)
+            .orElseThrow(
+                    () -> new RuntimeException(
+                            "User not found"
+                    )
+            );
+        
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> 
+                new RuntimeException("Order Doesn't Exist")
+            );
+    
+        if(admin.getRole() != Role.AGENT){
+            throw new RuntimeException(
+                    "Only agent can complete the order delivery"
+            );
+        }
+
+        if(order.getStatus() != OrderStatus.IN_TRANSIT){
+            throw new RuntimeException(
+                    "Agent can't complete this delivery"
+            );
+        }
+
+        if(admin.getId()!=orderRepository.findAgentIdByOrderId(order.getId())){
+            throw new RuntimeException(
+                "You can't complete the order delivery of another agent's order"
+            );
+        }
+
+        order.setStatus(OrderStatus.DELIVERED);
+        orderRepository.save(order);
+
+        OrderHistory history = OrderHistory.builder()
+                .order(order)
+                .previousStatus(OrderStatus.IN_TRANSIT)
+                .newStatus(OrderStatus.DELIVERED)
+                .changedBy(admin)
+                .note("Order Deliveried Sucessfully")
+                .build();
+        
+        orderHistoryRepository.save(history);
+
+        CreateOrderResponse orderResponse = new CreateOrderResponse(order.getId(), order.getStatus());
         return orderResponse;
     }
 }
