@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.logistic.logistic_engine.dto.Params.OrderParams;
 import com.logistic.logistic_engine.dto.request.AssignAgentRequest;
 import com.logistic.logistic_engine.dto.request.CreateOrderRequest;
+import com.logistic.logistic_engine.dto.request.FailOrderRequest;
 import com.logistic.logistic_engine.dto.response.ApiResponse;
 import com.logistic.logistic_engine.dto.response.AssignAgentResponse;
 import com.logistic.logistic_engine.dto.response.LoginResponse;
@@ -135,5 +136,38 @@ public class OrderController {
         );
         return ResponseEntity.ok(response);        
     }
-    
+
+    @PutMapping("/{id}/fail")
+    public ResponseEntity<ApiResponse<CreateOrderResponse>> failedOrderDelivery(@PathVariable Long id, @RequestBody FailOrderRequest request) {
+        String email = SecurityContextHolder
+                        .getContext()
+                        .getAuthentication()
+                        .getName();
+        CreateOrderResponse data = orderService.failedOrderDelivery(email, id, request.getReason());
+
+        ApiResponse<CreateOrderResponse> response = new ApiResponse<>(
+            true,
+            "Order marked as failed",
+            data
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/{id}/retry")
+    public ResponseEntity<ApiResponse<CreateOrderResponse>> retryOrderDelivery(@PathVariable Long orderId) {
+        String email = SecurityContextHolder
+                        .getContext()
+                        .getAuthentication()
+                        .getName();
+        CreateOrderResponse data = orderService.retryOrderDelivery(email, orderId);
+
+        ApiResponse<CreateOrderResponse> response = new ApiResponse<>(
+            true,
+            "Order Retried to agent Sucessfully",
+            data
+        );
+        return ResponseEntity.ok(response);        
+        
+    }
 }

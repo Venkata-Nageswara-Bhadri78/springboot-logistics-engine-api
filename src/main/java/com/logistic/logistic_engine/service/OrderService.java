@@ -289,4 +289,79 @@ public class OrderService {
         CreateOrderResponse orderResponse = new CreateOrderResponse(order.getId(), order.getStatus());
         return orderResponse;
     }
+
+    public CreateOrderResponse failedOrderDelivery(String email, Long orderId, String reason){
+        User agent = userRepository
+            .findByEmail(email)
+            .orElseThrow(
+                    () -> new RuntimeException(
+                            "User not found"
+                    )
+            );
+            
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> 
+                new RuntimeException("Order Doesn't Exist")
+            );
+        
+        if(agent.getRole()!=Role.AGENT){
+            throw new RuntimeException("Access Denied");
+        }
+        
+        if(agent.getId() != order.getAgent().getId()){
+            throw new RuntimeException("You don't have access to this order");
+        }
+        if(order.getStatus() != OrderStatus.IN_TRANSIT){
+            throw new RuntimeException("Order Status Invalid");
+        }
+        order.setStatus(OrderStatus.FAILED);
+        orderRepository.save(order);
+
+        OrderHistory history = OrderHistory.builder()
+                                .order(order)
+                                .previousStatus(OrderStatus.IN_TRANSIT)
+                                .newStatus(OrderStatus.FAILED)
+                                .changedBy(agent)
+                                .note(reason)
+                                .build();
+        orderHistoryRepository.save(history);
+
+        return new CreateOrderResponse(orderId, order.getStatus());
+    }
+
+    public CreateOrderResponse retryOrderDelivery(String email, Long orderId){
+        User admin = userRepository
+            .findByEmail(email)
+            .orElseThrow(
+                    () -> new RuntimeException(
+                            "User not found"
+                    )
+            );
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> 
+                new RuntimeException("Order Doesn't Exist")
+            );
+        
+        if(admin.getRole()!=Role.ADMIN){
+            throw new RuntimeException("Access Denied");
+        }
+
+        if(order.getStatus() != OrderStatus.FAILED){
+            throw new RuntimeException("Order Status Invalid");
+        }
+
+        order.setStatus(OrderStatus.ASSIGNED);
+        orderRepository.save(order);
+
+        OrderHistory history = OrderHistory.builder()
+                                .order(order)
+                                .previousStatus(OrderStatus.FAILED)
+                                .newStatus(OrderStatus.ASSIGNED)
+                                .changedBy(admin)
+                                .note("Order retried for delivery")
+                                .build();
+        orderHistoryRepository.save(history);
+
+        return new CreateOrderResponse(orderId, order.getStatus());
+    }
 }
