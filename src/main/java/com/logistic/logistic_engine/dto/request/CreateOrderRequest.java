@@ -13,7 +13,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class OrderRequest {
+public class CreateOrderRequest {
 
     @NotBlank(message = "Pickup Address is Mandatory")
     private String pickupAddress;

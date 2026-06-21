@@ -9,7 +9,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class OrderResponse {
+public class CreateOrderResponse {
     private Long id;
     private OrderStatus status;
 }

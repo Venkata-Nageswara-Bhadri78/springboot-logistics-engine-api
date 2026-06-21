@@ -61,4 +61,9 @@ public class Order {
     public void beforeUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
+
+    public Object findById() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'findById'");
+    }
 }
