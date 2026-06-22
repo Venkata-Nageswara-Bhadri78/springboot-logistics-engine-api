@@ -20,12 +20,9 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(
-            HttpSecurity http
-    ) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-        http
-                .csrf(csrf -> csrf.disable())
+        http.csrf(csrf -> csrf.disable())
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(
                                 SessionCreationPolicy.STATELESS
@@ -35,6 +32,7 @@ public class SecurityConfig {
                                 "/auth/**",
                                 "/health"
                         ).permitAll()
+                        .requestMatchers("/orders/**").authenticated()
                         .anyRequest()
                         .authenticated()
                 )

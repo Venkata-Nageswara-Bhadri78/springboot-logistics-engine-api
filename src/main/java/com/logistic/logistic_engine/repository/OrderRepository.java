@@ -111,6 +111,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     Optional<Order> findById(Long id);
 
-    @Query("SELECT o.agentId FROM Order o WHERE o.id = :orderId")
+    @Query(value = "SELECT agent_id FROM Orders WHERE id = :orderId", nativeQuery = true)
     Long findAgentIdByOrderId(@Param("orderId") Long orderId);
 }

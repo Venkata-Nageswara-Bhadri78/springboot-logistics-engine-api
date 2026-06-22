@@ -22,6 +22,7 @@ public class CreateOrderRequest {
     private String deliveryAddress;
 
     @Positive
+    @NotBlank(message = "Package Weight Must be Included")
     private Double packageWeight;
 
     @NotNull(message = "Priority is Mandatory")

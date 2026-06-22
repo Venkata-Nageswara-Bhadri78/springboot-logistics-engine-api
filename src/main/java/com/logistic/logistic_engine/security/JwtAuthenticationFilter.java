@@ -16,9 +16,8 @@ import java.util.Collections;
 
 @Component
 @RequiredArgsConstructor
-public class JwtAuthenticationFilter
-        extends OncePerRequestFilter {
-
+public class JwtAuthenticationFilter extends OncePerRequestFilter {
+        
     private final JwtService jwtService;
 
     @Override
@@ -38,13 +37,11 @@ public class JwtAuthenticationFilter
             return;
         }
 
-        String token =
-                authHeader.substring(7);
+        String token = authHeader.substring(7);
 
         if (jwtService.isTokenValid(token)) {
 
-            String email =
-                    jwtService.extractEmail(token);
+            String email = jwtService.extractEmail(token);
 
             UsernamePasswordAuthenticationToken authToken =
                     new UsernamePasswordAuthenticationToken(
@@ -58,8 +55,10 @@ public class JwtAuthenticationFilter
                             .buildDetails(request)
             );
 
-            SecurityContextHolder.getContext()
-                    .setAuthentication(authToken);
+            SecurityContextHolder.getContext().setAuthentication(authToken);
+
+            filterChain.doFilter(request, response);
+            return;
         }
 
         filterChain.doFilter(request, response);

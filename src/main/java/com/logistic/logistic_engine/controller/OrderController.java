@@ -10,6 +10,7 @@ import com.logistic.logistic_engine.dto.request.FailOrderRequest;
 import com.logistic.logistic_engine.dto.response.ApiResponse;
 import com.logistic.logistic_engine.dto.response.AssignAgentResponse;
 import com.logistic.logistic_engine.dto.response.LoginResponse;
+import com.logistic.logistic_engine.dto.response.OrderTimelineResponse;
 import com.logistic.logistic_engine.dto.response.PaginatedOrderResponse;
 import com.logistic.logistic_engine.enums.OrderStatus;
 import com.logistic.logistic_engine.repository.UserRepository;
@@ -44,14 +45,13 @@ public class OrderController {
     @PostMapping
     public ResponseEntity<ApiResponse<CreateOrderResponse>> createOrder(@Valid @RequestBody CreateOrderRequest orderRequest) {
 
-        String email =
-                SecurityContextHolder
+        String email = SecurityContextHolder
                         .getContext()
                         .getAuthentication()
                         .getName();
 
         CreateOrderResponse data = orderService.postOrders(email, orderRequest);
-        
+
         ApiResponse<CreateOrderResponse> response = new ApiResponse<>(
             true,
             "Order Placed Sucessfully",
@@ -106,7 +106,7 @@ public class OrderController {
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/{id}/start-delivery")
+    @PutMapping("/{orderId}/start-delivery")
     public ResponseEntity<ApiResponse<CreateOrderResponse>> startOrderDelivery(@PathVariable Long orderId) {
         String email = SecurityContextHolder
                         .getContext()
@@ -121,7 +121,7 @@ public class OrderController {
         return ResponseEntity.ok(response);
     }
     
-    @PutMapping("/{id}/deliver")
+    @PutMapping("/{orderId}/deliver")
     public ResponseEntity<ApiResponse<CreateOrderResponse>> completeOrderDevilery(@PathVariable Long orderId) {
         String email = SecurityContextHolder
                         .getContext()
@@ -137,13 +137,13 @@ public class OrderController {
         return ResponseEntity.ok(response);        
     }
 
-    @PutMapping("/{id}/fail")
-    public ResponseEntity<ApiResponse<CreateOrderResponse>> failedOrderDelivery(@PathVariable Long id, @RequestBody FailOrderRequest request) {
+    @PutMapping("/{orderId}/fail")
+    public ResponseEntity<ApiResponse<CreateOrderResponse>> failedOrderDelivery(@PathVariable Long orderId, @RequestBody FailOrderRequest request) {
         String email = SecurityContextHolder
                         .getContext()
                         .getAuthentication()
                         .getName();
-        CreateOrderResponse data = orderService.failedOrderDelivery(email, id, request.getReason());
+        CreateOrderResponse data = orderService.failedOrderDelivery(email, orderId, request.getReason());
 
         ApiResponse<CreateOrderResponse> response = new ApiResponse<>(
             true,
@@ -154,7 +154,7 @@ public class OrderController {
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/{id}/retry")
+    @PutMapping("/{orderId}/retry")
     public ResponseEntity<ApiResponse<CreateOrderResponse>> retryOrderDelivery(@PathVariable Long orderId) {
         String email = SecurityContextHolder
                         .getContext()
@@ -167,7 +167,24 @@ public class OrderController {
             "Order Retried to agent Sucessfully",
             data
         );
-        return ResponseEntity.ok(response);        
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{orderId}/timeline")
+    public ResponseEntity<ApiResponse<OrderTimelineResponse>> getOrderTimeline(@PathVariable Long orderId) {
+        String email = SecurityContextHolder
+                        .getContext()
+                        .getAuthentication()
+                        .getName();
+
+        OrderTimelineResponse data = orderService.getOrderEntireTimeline(email, orderId);
+
+        ApiResponse<OrderTimelineResponse> response = new ApiResponse<>(
+            true,
+            "Order timeline fetched successfully",
+            data
+        );
         
+        return ResponseEntity.ok(response);
     }
 }

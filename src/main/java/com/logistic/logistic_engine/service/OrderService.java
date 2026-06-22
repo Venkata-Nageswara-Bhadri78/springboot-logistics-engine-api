@@ -13,6 +13,7 @@ import com.logistic.logistic_engine.dto.request.CreateOrderRequest;
 import com.logistic.logistic_engine.dto.response.AssignAgentResponse;
 import com.logistic.logistic_engine.dto.response.CreateOrderResponse;
 import com.logistic.logistic_engine.dto.response.GetOrderResponse;
+import com.logistic.logistic_engine.dto.response.OrderTimelineResponse;
 import com.logistic.logistic_engine.dto.response.PaginatedOrderResponse;
 import com.logistic.logistic_engine.entity.Agent;
 import com.logistic.logistic_engine.entity.Customer;
@@ -43,24 +44,21 @@ public class OrderService {
 
     public CreateOrderResponse postOrders(String email, CreateOrderRequest orderRequest){
 
-        User user =
-                userRepository.findByEmail(email)
+        User user = userRepository.findByEmail(email)
                     .orElseThrow(
                             () -> new RuntimeException(
                                     "User not found"
                             )
                     );
         
-        Customer customer =
-                customerRepository.findByUserId(
-                            user.getId()
-                    )
-                    .orElseThrow(
-                            () -> new RuntimeException(
-                                    "Customer not found"
-                            )
-                    );
-                    
+        Customer customer = customerRepository.findByUserId(user.getId())
+                            .orElseThrow(
+                                    () -> new RuntimeException(
+                                            "Customer not found"
+                                    )
+                            );
+
+
         Order order = new Order();
 
         order.setCustomer(customer);
@@ -69,24 +67,15 @@ public class OrderService {
             orderRequest.getPickupAddress()
         );
 
-        order.setDeliveryAddress(
-            orderRequest.getDeliveryAddress()
-        );
+        order.setDeliveryAddress(orderRequest.getDeliveryAddress());
 
-        order.setPackageWeight(
-            orderRequest.getPackageWeight()
-        );
+        order.setPackageWeight(orderRequest.getPackageWeight());
 
-        order.setPriority(
-            orderRequest.getPriority()
-        );
+        order.setPriority(orderRequest.getPriority());
 
-        order.setStatus(
-                OrderStatus.CREATED
-        );
+        order.setStatus(OrderStatus.CREATED);
 
         Order savedOrder = orderRepository.save(order);
-
         return new CreateOrderResponse(
             savedOrder.getId(),
             savedOrder.getStatus()
@@ -363,5 +352,73 @@ public class OrderService {
         orderHistoryRepository.save(history);
 
         return new CreateOrderResponse(orderId, order.getStatus());
+    }
+
+
+    public OrderTimelineResponse getOrderEntireTimeline(String email, Long orderId){
+
+        User user = userRepository
+                .findByEmail(email)
+                .orElseThrow(
+                        () -> new RuntimeException(
+                                "User not found"
+                        )
+                );
+
+        Order order = orderRepository
+                .findById(orderId)
+                .orElseThrow(
+                        () -> new RuntimeException(
+                                "Order not found"
+                        )
+                );
+
+        if(user.getRole() == Role.CUSTOMER){
+
+            if(
+                !order.getCustomer()
+                        .getId()
+                        .equals(user.getId())
+            ){
+                throw new RuntimeException(
+                        "You cannot view this order"
+                );
+            }
+
+        }
+        else if(user.getRole() == Role.AGENT){
+
+            if(order.getAgent() == null){
+                throw new RuntimeException(
+                        "Order not assigned"
+                );
+            }
+
+            if(
+                !order.getAgent()
+                        .getId()
+                        .equals(user.getId())
+            ){
+                throw new RuntimeException(
+                        "You cannot view this order"
+                );
+            }
+
+        }
+        else if(user.getRole() != Role.ADMIN){
+            throw new RuntimeException(
+                    "Invalid user type"
+            );
+        }
+
+        List<OrderHistory> history =
+                orderHistoryRepository
+                        .findByOrderIdOrderByCreatedAtAsc(
+                                orderId
+                        );
+
+        return new OrderTimelineResponse(
+                history
+        );
     }
 }
